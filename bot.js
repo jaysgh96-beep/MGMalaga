@@ -6,12 +6,51 @@ const TOKEN = '8715398065:AAEHhx6fuBesnwqCu9lTDjZ2ImKrudaC7o8';
 const ADMIN_ID = 8801357221; // Mountain Giants admin
 
 const DATA_FILE = path.join(__dirname, 'data.json');
+
+const KNOWN_USERS = [
+  { id: 6084074692, name: 'Adelinaaaa',  username: '', joined: '2026-05-28' },
+  { id: 5375485730, name: 'Dryoluc4',    username: '', joined: '2026-05-28' },
+  { id: 620419498,  name: 'Maaniix',     username: '', joined: '2026-05-28' },
+  { id: 7672951970, name: 'Yano',        username: '', joined: '2026-05-28' },
+  { id: 2051061337, name: 'Giammarco',   username: '', joined: '2026-05-28' },
+  { id: 5406904845, name: 'H',           username: '', joined: '2026-05-28' },
+  { id: 5924294832, name: 'Frank',       username: '', joined: '2026-05-28' },
+  { id: 986156782,  name: 'Rnine',       username: '', joined: '2026-05-28' },
+  { id: 5351787838, name: 'RIINA',       username: '', joined: '2026-05-28' },
+  { id: 7984836807, name: 'Stros',       username: '', joined: '2026-05-28' },
+  { id: 261459980,  name: 'mastico98',   username: '', joined: '2026-05-28' },
+  { id: 6532814937, name: 'LOKAN',       username: '', joined: '2026-05-28' },
+  { id: 5835689181, name: 'Tom',         username: '', joined: '2026-05-28' },
+  { id: 8769870966, name: 'Sasuke',      username: '', joined: '2026-05-28' },
+  { id: 8530107138, name: 'Docteur',     username: '', joined: '2026-05-28' },
+  { id: 5555628194, name: 'Luca',        username: '', joined: '2026-05-28' },
+  { id: 6920270885, name: 'jhonny',      username: '', joined: '2026-05-28' },
+  { id: 1761952759, name: 'Grizly',      username: '', joined: '2026-05-28' },
+  { id: 7440450859, name: 'Cali',        username: '', joined: '2026-05-28' },
+  { id: 8222470152, name: 'Balotelli',   username: '', joined: '2026-05-28' },
+  { id: 7188554451, name: 'Pablo',       username: '', joined: '2026-05-28' },
+  { id: 8220471358, name: 'pietroobgh',  username: '', joined: '2026-05-28' },
+  { id: 1684521417, name: 'pppppp',      username: '', joined: '2026-05-28' },
+  { id: 7700498991, name: 'giussepe',    username: '', joined: '2026-05-28' },
+  { id: 6297731143, name: 'beguin',      username: '', joined: '2026-05-28' },
+  { id: 8315467615, name: '22',          username: '', joined: '2026-05-28' },
+  { id: 6031450920, name: 'Brian',       username: '', joined: '2026-05-28' },
+  { id: 1480386386, name: 'CAREFORCE',   username: '', joined: '2026-05-28' },
+  { id: 771183438,  name: 'Zoro',        username: '', joined: '2026-05-28' },
+  { id: 8801357221, name: 'MG',          username: '', joined: '2026-05-28' },
+  { id: 8153302403, name: 'Alltek',      username: '', joined: '2026-05-28' },
+  { id: 748561150,  name: 'Gi',          username: '', joined: '2026-05-28' },
+  { id: 8507692265, name: 'MG WORLD',    username: '', joined: '2026-05-28' },
+  { id: 7031425680, name: 'TIM',         username: '', joined: '2026-05-28' },
+  { id: 6110276756, name: 'sh187',       username: '', joined: '2026-05-28' },
+];
+
 const DEFAULT_DATA = {
   welcome: '🏔️ *Welcome to Mountain Giants Malaga™*\n\nOFFICIAL WORLD SHIPPING PAGE 📦\n\nChoose an option below 👇',
   notificationsEnabled: true,
-  users: [],
+  users: KNOWN_USERS,
   links: {
-    shop: 'https://comfy-cupcake-61233d.netlify.app/miniapp',
+    shop: 'https://comfy-cupcake-61233d.netlify.app',
     telegram: 'https://t.me/+eE212k9Cwc9kNGU0',
     potato: 'https://tato.im/mgmalaga2k26',
     instagram: 'https://www.instagram.com/mountaingiants_malaga?igsh=ZnFzbjJnaHZoczV3&utm_source=qr',
@@ -25,7 +64,17 @@ const DEFAULT_DATA = {
 
 function loadData() {
   try {
-    if (fs.existsSync(DATA_FILE)) return { ...DEFAULT_DATA, ...JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')) };
+    if (fs.existsSync(DATA_FILE)) {
+      const saved = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+      // merge KNOWN_USERS so they survive a fresh deploy
+      if (!saved.users || saved.users.length === 0) saved.users = KNOWN_USERS;
+      else {
+        for (const ku of KNOWN_USERS) {
+          if (!saved.users.find(u => u.id === ku.id)) saved.users.push(ku);
+        }
+      }
+      return { ...DEFAULT_DATA, ...saved };
+    }
   } catch(e) { console.error('Load error:', e.message); }
   return { ...DEFAULT_DATA };
 }
@@ -522,23 +571,35 @@ async function handleMessage(msg) {
 }
 
 async function sendWithPhoto(chatId, caption) {
-  const imgBuffer = Buffer.from(IMG_B64, 'base64');
   const KEYBOARD = buildKeyboard();
   if (cachedFileId) {
-    return await api('sendPhoto', {
+    const r = await api('sendPhoto', {
       chat_id: chatId, photo: cachedFileId,
       caption, parse_mode: 'Markdown', reply_markup: KEYBOARD
     });
+    if (r.ok) return r;
+    console.error('Cached photo send failed:', r.description);
+    cachedFileId = null;
   }
-  const res = await apiMultipart('sendPhoto', {
-    chat_id: chatId, caption,
-    parse_mode: 'Markdown', reply_markup: JSON.stringify(KEYBOARD)
-  }, imgBuffer, 'mountaingiants.jpg');
-  if (res.ok && res.result?.photo) {
-    cachedFileId = res.result.photo[res.result.photo.length - 1].file_id;
-    console.log('Image cached:', cachedFileId);
+  try {
+    const imgBuffer = Buffer.from(IMG_B64, 'base64');
+    const res = await apiMultipart('sendPhoto', {
+      chat_id: chatId, caption,
+      parse_mode: 'Markdown', reply_markup: JSON.stringify(KEYBOARD)
+    }, imgBuffer, 'mountaingiants.jpg');
+    if (res.ok && res.result?.photo) {
+      cachedFileId = res.result.photo[res.result.photo.length - 1].file_id;
+      console.log('Image cached:', cachedFileId);
+      return res;
+    }
+    console.error('Photo upload failed:', JSON.stringify(res));
+  } catch(e) {
+    console.error('Photo upload error:', e.message);
   }
-  return res;
+  return await api('sendMessage', {
+    chat_id: chatId, text: caption,
+    parse_mode: 'Markdown', reply_markup: KEYBOARD
+  });
 }
 
 let offset = 0;
