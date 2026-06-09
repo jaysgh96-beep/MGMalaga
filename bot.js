@@ -51,10 +51,8 @@ const DEFAULT_DATA = {
   users: KNOWN_USERS,
   links: {
     shop: 'https://comfy-cupcake-61233d.netlify.app',
-    telegram: 'https://t.me/+eE212k9Cwc9kNGU0',
-    potato: 'https://tato.im/mgmalaga2k26',
-    instagram: 'https://www.instagram.com/mountaingiants_malaga?igsh=ZnFzbjJnaHZoczV3&utm_source=qr',
-    contact: 'https://t.me/Mg_malaga'
+    instagram: 'https://www.instagram.com/mountaingiants.malaga?igsh=MWd6cWtjZDdyendsOA==',
+    contact: 'https://t.me/Mgmalagaorder'
   },
   config: { shopOpen: true, autoReply: true, closedMessage: '⛔ Shop is temporarily closed. Check back soon!' },
   orders: [],
@@ -88,10 +86,6 @@ function buildKeyboard() {
   return {
     inline_keyboard: [
       [{ text: '🏪 Shop', web_app: { url: db.links.shop } }],
-      [
-        { text: '📢 Canal Telegram', url: db.links.telegram },
-        { text: '🥔 Canal Potato', url: db.links.potato }
-      ],
       [
         { text: '📸 Instagram', url: db.links.instagram },
         { text: '💬 Contact Order', url: db.links.contact }
@@ -261,12 +255,11 @@ async function handleCallback(query) {
     const l = db.links;
     await api('sendMessage', {
       chat_id: chatId,
-      text: `🔗 *Current Links:*\n\n🏪 shop: \`${l.shop}\`\n📢 telegram: \`${l.telegram}\`\n🥔 potato: \`${l.potato}\`\n📸 instagram: \`${l.instagram}\`\n💬 contact: \`${l.contact}\``,
+      text: `🔗 *Current Links:*\n\n🏪 shop: \`${l.shop}\`\n📸 instagram: \`${l.instagram}\`\n💬 contact: \`${l.contact}\``,
       parse_mode: 'Markdown',
       reply_markup: {
         inline_keyboard: [
           [{ text: '🏪 Edit Shop URL', callback_data: 'adm_link_shop' }],
-          [{ text: '📢 Edit Telegram', callback_data: 'adm_link_telegram' }, { text: '🥔 Edit Potato', callback_data: 'adm_link_potato' }],
           [{ text: '📸 Edit Instagram', callback_data: 'adm_link_instagram' }, { text: '💬 Edit Contact', callback_data: 'adm_link_contact' }]
         ]
       }
