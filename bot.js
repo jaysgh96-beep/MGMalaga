@@ -2,8 +2,8 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const TOKEN = '8715398065:AAEHhx6fuBesnwqCu9lTDjZ2ImKrudaC7o8';
-const ADMIN_ID = 8801357221; // Mountain Giants admin
+const TOKEN = '8823724997:AAEHkpe9_a6QqY1be0Wo0aKiIYZmlb-KKFw';
+const ADMIN_ID = 8856637012; // Mountain Giants admin
 
 const DATA_FILE = path.join(__dirname, 'data.json');
 
